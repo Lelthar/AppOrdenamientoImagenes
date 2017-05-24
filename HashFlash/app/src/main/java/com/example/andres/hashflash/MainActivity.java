@@ -8,8 +8,10 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +24,7 @@ import android.widget.ImageView;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
@@ -74,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             Bitmap imageBitmap2 = toGrayscale(imageBitmap);
             mImageView.setImageBitmap(imageBitmap2);
-            Log.d(TAG, "Largo: "+Integer.toString(mImageView.getWidth())+"\n Ancho: "+Integer.toString(mImageView.getHeight()));
-            Log.d(TAG, "Pixel color: "+Integer.toString(imageBitmap2.getPixel(0,0)));
+            Log.d(TAG, "Largo: " + Integer.toString(mImageView.getWidth()) + "\n Ancho: " + Integer.toString(mImageView.getHeight()));
+            Log.d(TAG, "Pixel color: " + Integer.toString(imageBitmap2.getPixel(0, 0)));
 
         }
     }
@@ -98,12 +101,12 @@ public class MainActivity extends AppCompatActivity {
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
-    public Bitmap toGrayscale(Bitmap bmpOriginal)
-    {
+    public Bitmap toGrayscale(Bitmap bmpOriginal){ //Convierte un bitmap de rgb a escala de colores grises
         int width, height;
-        height = bmpOriginal.getHeight();
-        width = bmpOriginal.getWidth();
-
+        /*height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();*/
+        height = 256; //Le pasa 256 para que ese sea la altura de la imagen
+        width = 256; //Le pasa 256 para que ese sea el ancho de la imagen
         Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(bmpGrayscale);
         Paint paint = new Paint();
@@ -114,6 +117,76 @@ public class MainActivity extends AppCompatActivity {
         c.drawBitmap(bmpOriginal, 0, 0, paint);
         return bmpGrayscale;
     }
+    public int[] inicializarVector(int largo){ //Inicializa un arraylist con la cantidad que le ponga en la entrada
+        int[]lista = new int[largo];
+        for(int i = 0; i < largo; i++){
+            lista[i] = 0; //Le asigna en cada posicion un 0 para representar el histograma
+        }
+        return lista;
+    }
+    public int[] calcularLBP(Bitmap imageNew){
+        int[]lista = inicializarVector(256);
+        for(int i = 1; i < 255; i++){
+            for(int j = 1; j < 255; j++) {
+                String valorBinario = "";
+                if(imageNew.getPixel(i-1,j-1)>=imageNew.getPixel(i,j)){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(imageNew.getPixel(i-1,j)>=imageNew.getPixel(i,j)){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(imageNew.getPixel(i-1,j+1)>=imageNew.getPixel(i,j)){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(imageNew.getPixel(i,j+1)>=imageNew.getPixel(i,j)){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(imageNew.getPixel(i+1,j+1)>=imageNew.getPixel(i,j)){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(imageNew.getPixel(i+1,j)>=imageNew.getPixel(i,j)){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(imageNew.getPixel(i+1,j-1)>=imageNew.getPixel(i,j)){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(imageNew.getPixel(i,j-1)>=imageNew.getPixel(i,j)){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                lista[convertirBinarioDecimal(valorBinario)] += 1;
+
+            }
+        }
+        return lista;
+
+    }
+    public int convertirBinarioDecimal(String numero){
+        int salida = 0;
+        int potencia = numero.length()-1;
+        for(int i = 0; i < numero.length(); i++){
+            int var = (numero.charAt(i)-48);
+            salida += (var * Math.pow(2,potencia)); //Sacarle la potencia de 2 elevador a la variable de potencia
+            potencia--; //Disminuye la potencia para que el numero de 2 se eleve menor, hasta llevar a 0
+        }
+        return salida;
+    }
+
 }
 
 
