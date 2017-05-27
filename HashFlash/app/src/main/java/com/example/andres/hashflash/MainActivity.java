@@ -25,6 +25,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+<<<<<<< HEAD
+=======
+import java.util.ArrayList;
+>>>>>>> e35208befecb0eb60c4a79820d3b508fd4197419
 import java.util.Arrays;
 import java.util.Date;
 
@@ -126,15 +130,22 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
+            /*int redValue = Color.red(imageBitmap.getPixel(0, 0));
+            System.out.println("REEEEEEEEEEEEEEEEEDDDDDDDDDDDDDDD:" + redValue);
+            int greenValue = Color.green(imageBitmap.getPixel(0, 0));
+            System.out.println("GREEEEEEEEEEEEEEEENNNNNNNNNNNNN:" + greenValue);
+            int blueValue = Color.blue(imageBitmap.getPixel(0, 0));
+            System.out.println("BLUUUUUUUUUUUUUUUUUUUUUEEEEE:" + blueValue);*/
             Bitmap imageBitmap2 = toGrayscale(imageBitmap);
             mImageView.setImageBitmap(imageBitmap2);
-            Log.d(TAG, "Largo: " + Integer.toString(mImageView.getWidth()) + "\n Ancho: " + Integer.toString(mImageView.getHeight()));
-            Log.d(TAG, "Pixel color: " + Integer.toString(imageBitmap2.getPixel(0, 0)));
+            System.out.println("Largo: " + Integer.toString(imageBitmap2.getWidth()) + "\n Ancho: " + Integer.toString(imageBitmap2.getHeight()));
+            System.out.println("Pixel color: " + Integer.toString(imageBitmap2.getPixel(0, 0)));
+            int[]histograma =  calcularLBP(imageBitmap2);
+            System.out.println(Arrays.toString(histograma));
 
         }
     }
     */
-
 
     String mCurrentPhotoPath;
 
@@ -184,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 1; i < 255; i++) {
             for (int j = 1; j < 255; j++) {
                 String valorBinario = "";
+<<<<<<< HEAD
                 if (Color.green(imageNew.getPixel(i - 1, j - 1)) >= Color.green(imageNew.getPixel(i, j))) {
                     valorBinario += "1";
                 } else {
@@ -223,6 +235,47 @@ public class MainActivity extends AppCompatActivity {
                     valorBinario += "1";
                 } else {
                     valorBinario += "0";
+=======
+                if(Color.green(imageNew.getPixel(i-1,j-1))>=Color.green(imageNew.getPixel(i,j))){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(Color.green(imageNew.getPixel(i-1,j))>=Color.green(imageNew.getPixel(i,j))){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(Color.green(imageNew.getPixel(i-1,j+1))>=Color.green(imageNew.getPixel(i,j))){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(Color.green(imageNew.getPixel(i,j+1))>=Color.green(imageNew.getPixel(i,j))){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(Color.green(imageNew.getPixel(i+1,j+1))>=Color.green(imageNew.getPixel(i,j))){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(Color.green(imageNew.getPixel(i+1,j))>=Color.green(imageNew.getPixel(i,j))){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(Color.green(imageNew.getPixel(i+1,j-1))>=Color.green(imageNew.getPixel(i,j))){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+                }
+                if(Color.green(imageNew.getPixel(i,j-1))>=Color.green(imageNew.getPixel(i,j))){
+                    valorBinario+="1";
+                }else{
+                    valorBinario+="0";
+>>>>>>> e35208befecb0eb60c4a79820d3b508fd4197419
                 }
                 lista[convertirBinarioDecimal(valorBinario)] += 1;
 
