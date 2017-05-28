@@ -24,7 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -36,12 +38,15 @@ public class MainActivity extends AppCompatActivity {
     static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 15;
     private static final String TAG = "No se";
     ImageView mImageView;
+    ArrayList<int[]> planos = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        planos = readPlanos(10);
         Button click = (Button) findViewById(R.id.button);
         click.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -71,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("Data is Readable");
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);   // Captura la imagen con el intento
                 System.out.println("startActivityForResult . . .");
-                readPlanos(10);
+
             }
         }
     }
@@ -82,19 +87,25 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            /*int redValue = Color.red(imageBitmap.getPixel(0, 0));
-            System.out.println("REEEEEEEEEEEEEEEEEDDDDDDDDDDDDDDD:" + redValue);
-            int greenValue = Color.green(imageBitmap.getPixel(0, 0));
-            System.out.println("GREEEEEEEEEEEEEEEENNNNNNNNNNNNN:" + greenValue);
-            int blueValue = Color.blue(imageBitmap.getPixel(0, 0));
-            System.out.println("BLUUUUUUUUUUUUUUUUUUUUUEEEEE:" + blueValue);*/
-            Bitmap imageBitmap2 = toGrayscale(imageBitmap);
-            mImageView.setImageBitmap(imageBitmap2);
+            imageBitmap  = cambiarTamabho(imageBitmap,256,256);
+            Bitmap imageBitmap2 = toGrayscale(imageBitmap); //Conviertte el bitmap en colores grises
+            mImageView.setImageBitmap(imageBitmap2); //Se asiga al imageView, la imagen capturada
             System.out.println("Largo: " + Integer.toString(imageBitmap2.getWidth()) + "\n Ancho: " + Integer.toString(imageBitmap2.getHeight()));
             System.out.println("Pixel color: " + Integer.toString(imageBitmap2.getPixel(0, 0)));
             int[] histograma = calcularLBP(imageBitmap2);
+            //imprimirImagen(imageBitmap2);
+            String hashValor = calcularValorHash(histograma, planos);
             System.out.println(Arrays.toString(histograma));
+            System.out.println("Este es el valor hash: "+hashValor);
 
+        }
+    }
+    public void imprimirImagen(Bitmap imagen){
+        for(int i = 0; i < imagen.getWidth(); i++){
+            for(int j = 0; j < imagen.getHeight(); j++){
+                System.out.print(Color.green(imagen.getPixel(i,j))+" ");
+            }
+            System.out.println("");
         }
     }
 
@@ -152,6 +163,10 @@ public class MainActivity extends AppCompatActivity {
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
+    }
+    public Bitmap cambiarTamabho(Bitmap imagen , int ancho, int largo){
+        Bitmap nuevo = Bitmap.createScaledBitmap(imagen,largo,ancho,true);
+        return nuevo;
     }
 
     public Bitmap toGrayscale(Bitmap bmpOriginal) { //Convierte un bitmap de rgb a escala de colores grises
@@ -243,8 +258,58 @@ public class MainActivity extends AppCompatActivity {
         return salida;
     }
 
-    public void readPlanos(int cantidad){
+    public String calcularProductoPunto(int[] vector1, int[] vector2){ //Calcula el producto punto entre 2 vectores
+        int cantidad = 0;
+        for(int i = 0; i < vector1.length; i++){
+            cantidad+=(vector1[i]*vector2[i]); //Multiplica el elemento del vector en la posicion i de cada vector y luego se lo suma a cantidad
+        }
+        if(cantidad > 0){ //Revisa si cantidad es mayor que 0
+            System.out.println("Cantidad: "+Integer.toString(cantidad));
+            return "1";
+        }else { //Si no lo es, retorna 0 como el resultado del producto punto de los 2 vectores
+            System.out.println("Cantidad: "+Integer.toString(cantidad));
+            return "0";
+        }
+    }
+    public String calcularValorHash(int[] vector, ArrayList<int[]> planos){ //Calcula el valor hash de un histograma con los planos que tiene la lista de planos
+        String resultado = "";
+        for(int i = 0; i < planos.size(); i++){
+            //System.out.println("Hola"+calcularProductoPunto(vector,planos.get(i)));
+            //System.out.println(Arrays.toString(vector));
+            resultado += calcularProductoPunto(vector,planos.get(i)); //Llama a la funcion de calcular producto punto del histrograma contra un plano de la lista planos
+        }
+        return resultado; //Retorna el valor hash del histrograma con los planos que le dieron
+
+    }
+    public int[] convertirStringAVector(String listaString,int largo){ //Convierte un string como "[2,4,-12,5]" en un vector de int
+        int[] lista = new int[largo]; //Inicializa la lista que va a retornar
+        int contador = 0; //Es un contador que va a cambiar el indice en el vector
+        String numeroString = "";
+        for(int i = 0; i < listaString.length(); i++){
+            if(listaString.charAt(i) != '[' && listaString.charAt(i) != ']'){ //Revisa que el caracter no sea un [ o ]
+                if(listaString.charAt(i) != ','){
+                    String stringValueOf = String.valueOf(listaString.charAt(i));
+                    numeroString += stringValueOf;
+                }else{ //Es si el caracter leido, es una coma
+                    int numero = Integer.parseInt(numeroString); //Convierte en int el valor de numeroString
+                    lista[contador] = numero; //En el vector en la posicion contador, le pasa el numero que se convirtio arriba
+                    contador++;
+                    numeroString = "";
+                }
+            }else if(listaString.charAt(i) == ']'){ //Revisa si el caracter leido es "]", esta comparacion se hace porque al final el ultimo elemento, no se anhade si no se hace estos
+                int numero = Integer.parseInt(numeroString); //Convierte en int el valor de numeroString
+                lista[contador] = numero; //En el vector en la posicion contador, le pasa el numero que se convirtio arriba
+                contador++;
+                numeroString = "";
+            }
+        }
+        return lista;
+
+    }
+
+    public ArrayList<int[]> readPlanos(int cantidad){ //Retorna un arraylist con vectores de los planos
         BufferedReader reader = null;
+        ArrayList<int[]> lista = new ArrayList<>();
         try {
             System.out.println("En read PLANOS");
             InputStream json=getAssets().open("Planos.txt");
@@ -253,13 +318,14 @@ public class MainActivity extends AppCompatActivity {
             BufferedReader in = new BufferedReader(new InputStreamReader(json,"UTF-8"));
 
             // do reading, usually loop until end of file reading
-            String mLine;
-            mLine = "";
+            String mLine = "";
             while (cantidad > 0 && (mLine = in.readLine()) != null) {
                 //process line
                 System.out.println(mLine);
+                lista.add(convertirStringAVector(mLine.replace(" ",""),256)); //Convierte el string en un vector y lo añade al arraylist
                 cantidad --;
             }
+
         } catch (IOException e) {
             //log the exception
             System.out.println(e);
@@ -268,11 +334,13 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     System.out.println("En read PLANOS CLOSE");
                     reader.close();
+                    return lista;
                 } catch (IOException e) {
                     //log the exception
                 }
             }
         }
+        return lista;
     }
 }
 
