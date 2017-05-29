@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        planos = readPlanos(10);
+        planos = readPlanos(5);
         Button click = (Button) findViewById(R.id.button);
         click.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -171,8 +171,6 @@ public class MainActivity extends AppCompatActivity {
 
     public Bitmap toGrayscale(Bitmap bmpOriginal) { //Convierte un bitmap de rgb a escala de colores grises
         int width, height;
-        /*height = bmpOriginal.getHeight();
-        width = bmpOriginal.getWidth();*/
         height = 256; //Le pasa 256 para que ese sea la altura de la imagen
         width = 256; //Le pasa 256 para que ese sea el ancho de la imagen
         Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
