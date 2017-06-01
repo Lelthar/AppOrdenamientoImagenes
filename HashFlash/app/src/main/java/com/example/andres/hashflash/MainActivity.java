@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 
 import static android.os.Environment.getExternalStorageState;
 
@@ -39,14 +40,15 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "No se";
     ImageView mImageView;
     ArrayList<int[]> planos = null;
-
+    HashMap<String, String> hmap = new HashMap<String, String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        planos = readPlanos(10);
+        planos = readPlanos(4);
+        hmap = cargarTablaHash();
         Button click = (Button) findViewById(R.id.button);
         click.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -97,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
             String hashValor = calcularValorHash(histograma, planos);
             System.out.println(Arrays.toString(histograma));
             System.out.println("Este es el valor hash: "+hashValor);
+            System.out.println("El valor de la tabla hash es: "+hmap.get(hashValor));
 
         }
     }
@@ -171,8 +174,6 @@ public class MainActivity extends AppCompatActivity {
 
     public Bitmap toGrayscale(Bitmap bmpOriginal) { //Convierte un bitmap de rgb a escala de colores grises
         int width, height;
-        /*height = bmpOriginal.getHeight();
-        width = bmpOriginal.getWidth();*/
         height = 256; //Le pasa 256 para que ese sea la altura de la imagen
         width = 256; //Le pasa 256 para que ese sea el ancho de la imagen
         Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -341,6 +342,29 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return lista;
+    }
+    public HashMap<String, String> cargarTablaHash(){
+        //Aqui se añade los elementos a la tabla hash
+        HashMap<String, String> pHmap = new HashMap<String, String>();
+
+        pHmap.put("0000", "Dio 0");
+        pHmap.put("0001", "Dio 1");
+        pHmap.put("0010", "Dio 2");
+        pHmap.put("0011", "Dio 3");
+        pHmap.put("0100", "Dio 4");
+        pHmap.put("0101", "Dio 5");
+        pHmap.put("0110", "Dio 6");
+        pHmap.put("0111", "Dio 7");
+        pHmap.put("1000", "Dio 8");
+        pHmap.put("1001", "Dio 9");
+        pHmap.put("1010", "Dio 10");
+        pHmap.put("1011", "Dio 11");
+        pHmap.put("1100", "Dio 12");
+        pHmap.put("1101", "Dio 13");
+        pHmap.put("1110", "Dio 14");
+        pHmap.put("1111", "Dio 15");
+
+        return pHmap;
     }
 }
 
