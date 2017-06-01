@@ -1,6 +1,7 @@
 package com.example.andres.hashflash;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -18,6 +19,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,6 +34,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
+import imageSave.Save;
+
 import static android.os.Environment.getExternalStorageState;
 
 public class MainActivity extends AppCompatActivity {
@@ -41,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView mImageView;
     ArrayList<int[]> planos = null;
     HashMap<String, String> hmap = new HashMap<String, String>();
+    Context contexto = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,12 +97,15 @@ public class MainActivity extends AppCompatActivity {
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             imageBitmap  = cambiarTamabho(imageBitmap,256,256);
             Bitmap imageBitmap2 = toGrayscale(imageBitmap); //Conviertte el bitmap en colores grises
-            mImageView.setImageBitmap(imageBitmap2); //Se asiga al imageView, la imagen capturada
+            mImageView.setImageBitmap(imageBitmap); //Se asiga al imageView, la imagen capturada
             System.out.println("Largo: " + Integer.toString(imageBitmap2.getWidth()) + "\n Ancho: " + Integer.toString(imageBitmap2.getHeight()));
             System.out.println("Pixel color: " + Integer.toString(imageBitmap2.getPixel(0, 0)));
             int[] histograma = calcularLBP(imageBitmap2);
             //imprimirImagen(imageBitmap2);
             String hashValor = calcularValorHash(histograma, planos);
+            Save savefile = new Save();
+            String direccionImagen = savefile.SaveImage(contexto, imageBitmap); //Guarda la imagen y devuelve el path
+            Toast.makeText(contexto,direccionImagen,Toast.LENGTH_LONG).show(); //Muestra el path en pantalla
             System.out.println(Arrays.toString(histograma));
             System.out.println("Este es el valor hash: "+hashValor);
             System.out.println("El valor de la tabla hash es: "+hmap.get(hashValor));
